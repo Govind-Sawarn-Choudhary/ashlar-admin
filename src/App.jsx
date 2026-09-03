@@ -4,7 +4,11 @@ import DashboardPage from './pages/DashboardPage.jsx';
 import LawyerDetailPage from './pages/LawyerDetailPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import UsersPage from './pages/UsersPage.jsx';
+import UserDetailPage from './pages/UserDetailPage.jsx';
 import AppointmentsPage from './pages/AppointmentsPage.jsx';
+import AppointmentDetailPage from './pages/AppointmentDetailPage.jsx';
+import ConsultationsPage from './pages/ConsultationsPage.jsx';
+import ConsultationDetailPage from './pages/ConsultationDetailPage.jsx';
 import PaymentsPage from './pages/PaymentsPage.jsx';
 import SettingsPage from './pages/SettingsPage.jsx';
 
@@ -53,10 +57,42 @@ export default function App() {
         }
       />
       <Route
+        path="/users/:id"
+        element={
+          <ProtectedRoute>
+            <UserDetailPage onLogout={() => setToken(null)} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/appointments"
         element={
           <ProtectedRoute>
             <AppointmentsPage onLogout={() => setToken(null)} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/appointments/:id"
+        element={
+          <ProtectedRoute>
+            <AppointmentDetailPage onLogout={() => setToken(null)} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/consultations"
+        element={
+          <ProtectedRoute>
+            <ConsultationsPage onLogout={() => setToken(null)} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/consultations/:id"
+        element={
+          <ProtectedRoute>
+            <ConsultationDetailPage onLogout={() => setToken(null)} />
           </ProtectedRoute>
         }
       />

@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api, ApiError } from '../api/client.js';
 import { AdminLayout } from '../components/AdminLayout.jsx';
 import { Alert } from '../components/Alert.jsx';
 import { LoadingBlock } from '../components/LoadingBlock.jsx';
+import { StatusBadge } from '../components/StatusBadge.jsx';
 import { barBadgeType, formatDate, isBarUnverified } from '../utils/lawyer.js';
-
-function StatusBadge({ status }) {
-  return <span className={`badge badge-${status}`}>{status}</span>;
-}
+import { formatCurrency, formatLabel } from '../utils/format.js';
 
 function BarVerificationBadge({ lawyer }) {
   const type = barBadgeType(lawyer);
@@ -22,10 +20,20 @@ function BarVerificationBadge({ lawyer }) {
   return <span className={`badge badge-${type}`}>{labels[type]}</span>;
 }
 
+function IntegrationPill({ label, ok, detail }) {
+  return (
+    <div className={`integration-pill ${ok ? 'integration-pill-ok' : 'integration-pill-warn'}`}>
+      <span className="integration-pill-label">{label}</span>
+      <span className="integration-pill-detail">{detail}</span>
+    </div>
+  );
+}
+
 export default function DashboardPage({ onLogout }) {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [overview, setOverview] = useState(null);
+  const [integrations, setIntegrations] = useState(null);
   const [lawyers, setLawyers] = useState([]);
   const [status, setStatus] = useState('pending');
   const [barUnverified, setBarUnverified] = useState(false);
@@ -38,7 +46,7 @@ export default function DashboardPage({ onLogout }) {
     setError('');
 
     try {
-      const [statsData, lawyersData, overviewData] = await Promise.all([
+      const [statsData, lawyersData, overviewData, integrationsData] = await Promise.all([
         api.getStats(),
         api.getLawyers({
           status: barUnverified ? undefined : status,
@@ -46,10 +54,12 @@ export default function DashboardPage({ onLogout }) {
           search: search || undefined,
         }),
         api.getOverviewStats().catch(() => null),
+        api.getIntegrations().catch(() => null),
       ]);
       setStats(statsData.stats);
       setLawyers(lawyersData.lawyers);
       setOverview(overviewData);
+      setIntegrations(integrationsData);
     } catch (err) {
       if (err instanceof ApiError && err.code === 'auth') {
         onLogout();
@@ -76,16 +86,12 @@ export default function DashboardPage({ onLogout }) {
 
   return (
     <AdminLayout
-      title="Lawyers"
-      subtitle="Review onboarding submissions and approve lawyers"
+      title="Dashboard"
+      subtitle="Platform overview, lawyer onboarding, and live consultations"
       onLogout={handleLogout}
     >
       {error ? (
-        <Alert
-          title="Could not load dashboard"
-          message={error}
-          onRetry={load}
-        />
+        <Alert title="Could not load dashboard" message={error} onRetry={load} />
       ) : null}
 
       {overview ? (
@@ -99,8 +105,83 @@ export default function DashboardPage({ onLogout }) {
             <p>{overview.appointments}</p>
           </div>
           <div className="card stat-card">
-            <h3>Payments total</h3>
-            <p>₹{overview.paymentTotal}</p>
+            <h3>Revenue</h3>
+            <p>{formatCurrency(overview.paymentTotal)}</p>
+          </div>
+          <div className="card stat-card">
+            <h3>Active sessions</h3>
+            <p>{overview.activeConsultations ?? 0}</p>
+            <Link className="stat-link" to="/consultations?status=active">
+              View live
+            </Link>
+          </div>
+          <div className="card stat-card">
+            <h3>Waiting sessions</h3>
+            <p>{overview.waitingConsultations ?? 0}</p>
+          </div>
+        </div>
+      ) : null}
+
+      {overview?.bookingsByType?.length ? (
+        <div className="card">
+          <div className="page-card-header">
+            <div>
+              <h2>Bookings by type</h2>
+              <p className="page-card-meta">Consultation mix across the platform</p>
+            </div>
+          </div>
+          <div className="stats-grid">
+            {overview.bookingsByType.map((item) => (
+              <div key={item.type} className="mini-stat">
+                <span className="mini-stat-label">{formatLabel(item.type)}</span>
+                <strong>{item.count}</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {integrations ? (
+        <div className="card">
+          <div className="page-card-header">
+            <div>
+              <h2>Integrations</h2>
+              <p className="page-card-meta">Payment and consultation providers</p>
+            </div>
+          </div>
+          <div className="integration-grid">
+            <IntegrationPill
+              label="Razorpay"
+              ok={integrations.razorpay?.enabled}
+              detail={
+                integrations.razorpay?.enabled
+                  ? 'Configured and enabled'
+                  : 'Add keys in backend .env'
+              }
+            />
+            <IntegrationPill
+              label="Agora RTC"
+              ok={integrations.agora?.enabled}
+              detail={
+                integrations.agora?.enabled
+                  ? 'Voice & video ready'
+                  : 'Set AGORA_APP_ID and certificate'
+              }
+            />
+            <IntegrationPill
+              label="Agora Chat"
+              ok={integrations.agora?.chatAppKeyConfigured}
+              detail={
+                integrations.agora?.chatAppKeyConfigured
+                  ? 'Chat SDK ready'
+                  : 'Set AGORA_CHAT_APP_KEY'
+              }
+            />
+            <IntegrationPill
+              label="OTP"
+              ok={integrations.otp?.testMode}
+              detail={`Test mode · ${integrations.otp?.testPhone || '8521429014'}`}
+            />
           </div>
         </div>
       ) : null}
@@ -115,7 +196,7 @@ export default function DashboardPage({ onLogout }) {
               setStatus('pending');
             }}
           >
-            <h3>Pending</h3>
+            <h3>Pending lawyers</h3>
             <p>{stats.pending}</p>
             <span className="stat-hint">Click to filter</span>
           </button>
@@ -165,6 +246,13 @@ export default function DashboardPage({ onLogout }) {
       ) : null}
 
       <div className="card">
+        <div className="page-card-header">
+          <div>
+            <h2>Lawyer onboarding</h2>
+            <p className="page-card-meta">Review and approve lawyer profiles</p>
+          </div>
+        </div>
+
         <div className="toolbar">
           <select
             className="input input-inline"

@@ -1,9 +1,10 @@
 import { NavLink } from 'react-router-dom';
 
 const links = [
-  { to: '/', label: 'Lawyers', hint: 'Onboarding & approval' },
+  { to: '/', label: 'Dashboard', hint: 'Lawyers & overview' },
   { to: '/users', label: 'Users', hint: 'Client accounts' },
   { to: '/appointments', label: 'Appointments', hint: 'Bookings' },
+  { to: '/consultations', label: 'Consultations', hint: 'Chat, audio, video' },
   { to: '/payments', label: 'Payments', hint: 'Transactions' },
   { to: '/settings', label: 'Settings', hint: 'Platform config' },
 ];

@@ -371,6 +371,17 @@ button:disabled {
   color: var(--danger);
 }
 
+.badge-active,
+.badge-waiting {
+  background: rgba(212, 175, 55, 0.15);
+  color: #d4af37;
+}
+
+.badge-ended {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
 .badge-rejected {
   background: rgba(139, 30, 30, 0.25);
   color: var(--danger);
@@ -516,6 +527,116 @@ button:disabled {
 .stat-hint {
   display: block;
   margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.stat-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.integration-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.integration-pill {
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--surface-border);
+}
+
+.integration-pill-ok {
+  background: rgba(31, 107, 63, 0.12);
+  border-color: rgba(125, 255, 176, 0.2);
+}
+
+.integration-pill-warn {
+  background: rgba(255, 140, 0, 0.1);
+  border-color: rgba(255, 179, 71, 0.25);
+}
+
+.integration-pill-label {
+  font-weight: 700;
+}
+
+.integration-pill-detail {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.mini-stat {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mini-stat-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.mono-cell {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+.chat-log {
+  display: grid;
+  gap: 12px;
+}
+
+.chat-log-item {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.chat-log-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.settings-form-grid {
+  max-width: 640px;
+}
+
+.settings-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-enforced-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(31, 107, 63, 0.2);
+  color: var(--success);
+}
+
+.settings-help {
   font-size: 12px;
   color: var(--text-muted);
 }

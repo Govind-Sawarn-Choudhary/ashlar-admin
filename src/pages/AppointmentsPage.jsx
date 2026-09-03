@@ -1,25 +1,31 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../components/AdminLayout.jsx';
 import { Alert } from '../components/Alert.jsx';
 import { LoadingBlock } from '../components/LoadingBlock.jsx';
+import { StatusBadge } from '../components/StatusBadge.jsx';
 import { api } from '../api/client.js';
-
-function StatusBadge({ status }) {
-  const normalized = (status || 'pending').toLowerCase();
-  return <span className={`badge badge-${normalized}`}>{status}</span>;
-}
+import { formatCurrency, formatDate, formatLabel } from '../utils/format.js';
 
 export default function AppointmentsPage({ onLogout }) {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const [status, setStatus] = useState('');
+  const [consultationType, setConsultationType] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  async function load(nextStatus = status) {
+  async function load(filters = {}) {
     setLoading(true);
     setError('');
     try {
-      const data = await api.getAppointments(nextStatus ? { status: nextStatus } : {});
+      const params = {};
+      const nextStatus = filters.status ?? status;
+      const nextType = filters.consultationType ?? consultationType;
+      if (nextStatus) params.status = nextStatus;
+      if (nextType) params.consultationType = nextType;
+
+      const data = await api.getAppointments(params);
       setAppointments(data.appointments || []);
     } catch (err) {
       setError(err.message || 'Failed to load appointments');
@@ -50,13 +56,27 @@ export default function AppointmentsPage({ onLogout }) {
             value={status}
             onChange={(e) => {
               setStatus(e.target.value);
-              load(e.target.value);
+              load({ status: e.target.value });
             }}
           >
             <option value="">All statuses</option>
             <option value="confirmed">Confirmed</option>
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
+          </select>
+          <select
+            className="admin-input input-inline"
+            value={consultationType}
+            onChange={(e) => {
+              setConsultationType(e.target.value);
+              load({ consultationType: e.target.value });
+            }}
+          >
+            <option value="">All types</option>
+            <option value="chat">Chat</option>
+            <option value="audio">Audio</option>
+            <option value="video">Video</option>
+            <option value="physical">Physical</option>
           </select>
         </div>
 
@@ -66,7 +86,9 @@ export default function AppointmentsPage({ onLogout }) {
           <div className="empty-state">
             <h3>No appointments</h3>
             <p className="muted">
-              {status ? `No ${status} appointments right now.` : 'No bookings have been made yet.'}
+              {status || consultationType
+                ? 'No appointments match the selected filters.'
+                : 'No bookings have been made yet.'}
             </p>
           </div>
         ) : (
@@ -78,21 +100,29 @@ export default function AppointmentsPage({ onLogout }) {
                   <th>User</th>
                   <th>Lawyer</th>
                   <th>Type</th>
+                  <th>Mode</th>
                   <th>Amount</th>
                   <th>Status</th>
+                  <th>Date</th>
                 </tr>
               </thead>
               <tbody>
                 {appointments.map((item) => (
-                  <tr key={item.id}>
+                  <tr
+                    key={item.id}
+                    className="table-row-clickable"
+                    onClick={() => navigate(`/appointments/${item.id}`)}
+                  >
                     <td>{item.id}</td>
                     <td>{item.userName || item.userPhone}</td>
                     <td>{item.lawyerName || item.lawyerPhone}</td>
-                    <td>{item.consultationType}</td>
-                    <td>₹{item.amount}</td>
+                    <td>{formatLabel(item.consultationType)}</td>
+                    <td>{formatLabel(item.mode)}</td>
+                    <td>{formatCurrency(item.amount)}</td>
                     <td>
                       <StatusBadge status={item.status} />
                     </td>
+                    <td>{formatDate(item.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

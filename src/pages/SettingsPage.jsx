@@ -6,6 +6,8 @@ import { api } from '../api/client.js';
 
 export default function SettingsPage({ onLogout }) {
   const [settings, setSettings] = useState({});
+  const [meta, setMeta] = useState({});
+  const [updatedAt, setUpdatedAt] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -18,6 +20,8 @@ export default function SettingsPage({ onLogout }) {
       try {
         const data = await api.getSettings();
         setSettings(data.settings || {});
+        setMeta(data.meta || {});
+        setUpdatedAt(data.updatedAt || {});
       } catch (err) {
         setError(err.message || 'Failed to load settings');
       } finally {
@@ -35,7 +39,9 @@ export default function SettingsPage({ onLogout }) {
     try {
       const data = await api.updateSettings(settings);
       setSettings(data.settings || {});
-      setMessage('Settings saved');
+      setMeta(data.meta || {});
+      setUpdatedAt(data.updatedAt || {});
+      setMessage('Settings saved successfully');
     } catch (err) {
       setError(err.message || 'Failed to save settings');
     } finally {
@@ -46,6 +52,14 @@ export default function SettingsPage({ onLogout }) {
   function update(key, value) {
     setSettings((current) => ({ ...current, [key]: value }));
   }
+
+  const fields = [
+    { key: 'support_phone', label: 'Support phone' },
+    { key: 'commission_percent', label: 'Commission %', type: 'number' },
+    { key: 'min_wallet_topup', label: 'Min wallet top-up', type: 'number' },
+    { key: 'min_wallet_withdrawal', label: 'Min wallet withdrawal', type: 'number' },
+    { key: 'challan_test_otp', label: 'Challan test OTP' },
+  ];
 
   return (
     <AdminLayout title="Settings" subtitle="Platform configuration" onLogout={onLogout}>
@@ -58,45 +72,37 @@ export default function SettingsPage({ onLogout }) {
           <div className="page-card-header">
             <div>
               <h2>Platform settings</h2>
-              <p className="page-card-meta">Support, commission, wallet, and test OTP</p>
+              <p className="page-card-meta">
+                Values marked as enforced are applied live in booking, wallet, and payout flows
+              </p>
             </div>
           </div>
-          <div className="admin-form-grid">
-          <label>
-            Support phone
-            <input
-              className="admin-input"
-              value={settings.support_phone || ''}
-              onChange={(e) => update('support_phone', e.target.value)}
-            />
-          </label>
-          <label>
-            Commission %
-            <input
-              className="admin-input"
-              value={settings.commission_percent || ''}
-              onChange={(e) => update('commission_percent', e.target.value)}
-            />
-          </label>
-          <label>
-            Min wallet top-up
-            <input
-              className="admin-input"
-              value={settings.min_wallet_topup || ''}
-              onChange={(e) => update('min_wallet_topup', e.target.value)}
-            />
-          </label>
-          <label>
-            Challan test OTP
-            <input
-              className="admin-input"
-              value={settings.challan_test_otp || ''}
-              onChange={(e) => update('challan_test_otp', e.target.value)}
-            />
-          </label>
-          <button type="button" className="btn btn-primary" disabled={saving} onClick={save}>
-            {saving ? 'Saving…' : 'Save settings'}
-          </button>
+          <div className="admin-form-grid settings-form-grid">
+            {fields.map((field) => (
+              <label key={field.key}>
+                <span className="settings-label-row">
+                  <span>{field.label}</span>
+                  {meta[field.key]?.enforced ? (
+                    <span className="settings-enforced-badge">Enforced</span>
+                  ) : null}
+                </span>
+                <input
+                  className="admin-input"
+                  type={field.type || 'text'}
+                  value={settings[field.key] || ''}
+                  onChange={(e) => update(field.key, e.target.value)}
+                />
+                {meta[field.key]?.description ? (
+                  <span className="settings-help">{meta[field.key].description}</span>
+                ) : null}
+                {updatedAt[field.key] ? (
+                  <span className="settings-help">Last updated {updatedAt[field.key]}</span>
+                ) : null}
+              </label>
+            ))}
+            <button type="button" className="btn btn-primary" disabled={saving} onClick={save}>
+              {saving ? 'Saving…' : 'Save settings'}
+            </button>
           </div>
         </div>
       )}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../components/AdminLayout.jsx';
 import { Alert } from '../components/Alert.jsx';
 import { LoadingBlock } from '../components/LoadingBlock.jsx';
@@ -13,6 +14,7 @@ function ProfileBadge({ complete }) {
 }
 
 export default function UsersPage({ onLogout }) {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -78,17 +80,34 @@ export default function UsersPage({ onLogout }) {
                   <th>Email</th>
                   <th>Location</th>
                   <th>Profile</th>
+                  <th />
                 </tr>
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.id}>
+                  <tr
+                    key={user.id}
+                    className="table-row-clickable"
+                    onClick={() => navigate(`/users/${user.id}`)}
+                  >
                     <td>{user.fullName || '—'}</td>
                     <td>{user.phone}</td>
                     <td>{user.email || '—'}</td>
                     <td>{user.location || '—'}</td>
                     <td>
                       <ProfileBadge complete={user.profileComplete} />
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/users/${user.id}`);
+                        }}
+                      >
+                        View
+                      </button>
                     </td>
                   </tr>
                 ))}

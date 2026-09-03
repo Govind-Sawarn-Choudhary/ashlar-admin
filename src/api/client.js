@@ -150,6 +150,21 @@ export const api = {
     return request(`/api/admin/users${query ? `?${query}` : ''}`);
   },
   getUser: (id) => request(`/api/admin/users/${id}`),
+  getAppointment: (id) => request(`/api/admin/appointments/${id}`),
+  getConsultations: (params = {}) => {
+    const query = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(params).filter(([, value]) => value !== undefined && value !== ''),
+      ),
+    ).toString();
+    return request(`/api/admin/consultations${query ? `?${query}` : ''}`);
+  },
+  getConsultation: (id) => request(`/api/admin/consultations/${id}`),
+  endConsultation: (id) =>
+    request(`/api/admin/consultations/${id}/end`, {
+      method: 'POST',
+    }),
+  getIntegrations: () => request('/api/admin/integrations'),
   getAppointments: (params = {}) => {
     const query = new URLSearchParams(
       Object.fromEntries(

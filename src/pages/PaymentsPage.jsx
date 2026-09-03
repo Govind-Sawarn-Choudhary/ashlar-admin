@@ -2,55 +2,43 @@ import { useEffect, useState } from 'react';
 import { AdminLayout } from '../components/AdminLayout.jsx';
 import { Alert } from '../components/Alert.jsx';
 import { LoadingBlock } from '../components/LoadingBlock.jsx';
+import { StatusBadge } from '../components/StatusBadge.jsx';
 import { api } from '../api/client.js';
-
-function StatusBadge({ status }) {
-  const normalized = (status || 'pending').toLowerCase();
-  return <span className={`badge badge-${normalized}`}>{status}</span>;
-}
-
-function formatDate(value) {
-  if (!value) {
-    return '—';
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return date.toLocaleString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
+import { formatCurrency, formatDate, formatLabel } from '../utils/format.js';
 
 export default function PaymentsPage({ onLogout }) {
   const [payments, setPayments] = useState([]);
+  const [status, setStatus] = useState('');
+  const [paymentType, setPaymentType] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-      setError('');
-      try {
-        const data = await api.getPayments();
-        setPayments(data.payments || []);
-      } catch (err) {
-        setError(err.message || 'Failed to load payments');
-      } finally {
-        setLoading(false);
-      }
-    }
+  async function load(filters = {}) {
+    setLoading(true);
+    setError('');
+    try {
+      const params = {};
+      const nextStatus = filters.status ?? status;
+      const nextType = filters.paymentType ?? paymentType;
+      if (nextStatus) params.status = nextStatus;
+      if (nextType) params.paymentType = nextType;
 
+      const data = await api.getPayments(params);
+      setPayments(data.payments || []);
+    } catch (err) {
+      setError(err.message || 'Failed to load payments');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
     load();
   }, []);
 
-  const total = payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+  const completedTotal = payments
+    .filter((payment) => payment.status === 'completed')
+    .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
 
   return (
     <AdminLayout title="Payments" subtitle="Transactions across the platform" onLogout={onLogout}>
@@ -58,12 +46,12 @@ export default function PaymentsPage({ onLogout }) {
 
       <div className="stats-grid">
         <div className="card stat-card">
-          <h3>Total transactions</h3>
+          <h3>Transactions</h3>
           <p>{payments.length}</p>
         </div>
         <div className="card stat-card">
-          <h3>Volume</h3>
-          <p>₹{total.toLocaleString('en-IN')}</p>
+          <h3>Completed volume</h3>
+          <p>{formatCurrency(completedTotal)}</p>
         </div>
       </div>
 
@@ -75,12 +63,45 @@ export default function PaymentsPage({ onLogout }) {
           </div>
         </div>
 
+        <div className="admin-toolbar">
+          <select
+            className="admin-input input-inline"
+            value={status}
+            onChange={(e) => {
+              setStatus(e.target.value);
+              load({ status: e.target.value });
+            }}
+          >
+            <option value="">All statuses</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+            <option value="failed">Failed</option>
+          </select>
+          <select
+            className="admin-input input-inline"
+            value={paymentType}
+            onChange={(e) => {
+              setPaymentType(e.target.value);
+              load({ paymentType: e.target.value });
+            }}
+          >
+            <option value="">All types</option>
+            <option value="booking">Booking</option>
+            <option value="wallet_topup">Wallet top-up</option>
+            <option value="challan">Challan</option>
+          </select>
+        </div>
+
         {loading ? (
           <LoadingBlock label="Loading payments..." />
         ) : payments.length === 0 ? (
           <div className="empty-state">
             <h3>No payments yet</h3>
-            <p className="muted">Transactions will appear here once users pay.</p>
+            <p className="muted">
+              {status || paymentType
+                ? 'No payments match the selected filters.'
+                : 'Transactions will appear here once users pay.'}
+            </p>
           </div>
         ) : (
           <div className="admin-table-wrap">
@@ -101,8 +122,8 @@ export default function PaymentsPage({ onLogout }) {
                   <tr key={payment.id}>
                     <td>{payment.reference}</td>
                     <td>{payment.userName || payment.userPhone}</td>
-                    <td>{payment.paymentType}</td>
-                    <td>₹{Number(payment.amount || 0).toLocaleString('en-IN')}</td>
+                    <td>{formatLabel(payment.paymentType)}</td>
+                    <td>{formatCurrency(payment.amount)}</td>
                     <td>
                       <StatusBadge status={payment.status} />
                     </td>
