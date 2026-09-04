@@ -44,6 +44,36 @@ export function formatDay(selectedDay) {
   return days[index] || '—';
 }
 
+export function formatSelectedDays(availability) {
+  if (!availability) {
+    return '—';
+  }
+
+  if (asBool(availability.repeat_weekly)) {
+    return 'Every day (Mon–Sun)';
+  }
+
+  let selectedDays = [];
+  if (availability.selected_days) {
+    try {
+      const parsed = JSON.parse(availability.selected_days);
+      if (Array.isArray(parsed)) {
+        selectedDays = parsed;
+      }
+    } catch {
+      selectedDays = [];
+    }
+  }
+
+  if (selectedDays.length === 0 && availability.selected_day !== undefined) {
+    selectedDays = [Number(availability.selected_day)];
+  }
+
+  const shortDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const labels = [...new Set(selectedDays.map((day) => shortDays[Number(day)]).filter(Boolean))];
+  return labels.length > 0 ? labels.join(', ') : '—';
+}
+
 export function formatDate(value) {
   if (!value) {
     return '—';

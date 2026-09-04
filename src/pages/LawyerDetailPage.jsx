@@ -7,7 +7,7 @@ import { LoadingBlock } from '../components/LoadingBlock.jsx';
 import {
   asBool,
   barStatusLabel,
-  formatDay,
+  formatSelectedDays,
   formatDate,
   isBarUnverified,
 } from '../utils/lawyer.js';
@@ -312,7 +312,7 @@ export default function LawyerDetailPage({ onLogout }) {
           <h2>Availability</h2>
           {lawyer.availability ? (
             <>
-              <InfoRow label="Day" value={formatDay(lawyer.availability.selected_day)} />
+              <InfoRow label="Working days" value={formatSelectedDays(lawyer.availability)} />
               <InfoRow
                 label="Time"
                 value={`${lawyer.availability.from_time || '—'} – ${lawyer.availability.to_time || '—'}`}
