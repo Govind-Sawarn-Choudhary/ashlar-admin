@@ -11,6 +11,7 @@ import {
   formatDate,
   isBarUnverified,
 } from '../utils/lawyer.js';
+import { formatLabel } from '../utils/format.js';
 
 const DOC_LABELS = {
   bar_council_certificate: 'Bar Council Certificate',
@@ -335,9 +336,11 @@ export default function LawyerDetailPage({ onLogout }) {
             <ul className="fee-list">
               {(lawyer.fees || []).map((fee) => (
                 <li key={fee.fee_type}>
-                  <strong>{fee.fee_type}</strong>
+                  <strong>{formatLabel(fee.fee_type)}</strong>
                   <span>
-                    ₹{fee.amount} / {fee.duration_label}
+                    {fee.fee_type === 'physical'
+                      ? `₹${fee.amount} per session`
+                      : `₹${fee.amount} / ${fee.duration_label}`}
                     {fee.location ? ` @ ${fee.location}` : ''}
                   </span>
                 </li>

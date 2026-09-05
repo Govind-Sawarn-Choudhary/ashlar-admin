@@ -29,6 +29,25 @@ function IntegrationPill({ label, ok, detail }) {
   );
 }
 
+function PremiumStatCard({ icon, label, value, linkTo, linkLabel }) {
+  return (
+    <div className="card stat-card premium-stat-card">
+      <div className="premium-stat-top">
+        <h3>{label}</h3>
+        <span className="premium-stat-icon" aria-hidden="true">
+          {icon}
+        </span>
+      </div>
+      <p>{value}</p>
+      {linkTo ? (
+        <Link className="stat-link" to={linkTo}>
+          {linkLabel}
+        </Link>
+      ) : null}
+    </div>
+  );
+}
+
 export default function DashboardPage({ onLogout }) {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
@@ -96,29 +115,21 @@ export default function DashboardPage({ onLogout }) {
 
       {overview ? (
         <div className="stats-grid">
-          <div className="card stat-card">
-            <h3>Users</h3>
-            <p>{overview.users}</p>
-          </div>
-          <div className="card stat-card">
-            <h3>Appointments</h3>
-            <p>{overview.appointments}</p>
-          </div>
-          <div className="card stat-card">
-            <h3>Revenue</h3>
-            <p>{formatCurrency(overview.paymentTotal)}</p>
-          </div>
-          <div className="card stat-card">
-            <h3>Active sessions</h3>
-            <p>{overview.activeConsultations ?? 0}</p>
-            <Link className="stat-link" to="/consultations?status=active">
-              View live
-            </Link>
-          </div>
-          <div className="card stat-card">
-            <h3>Waiting sessions</h3>
-            <p>{overview.waitingConsultations ?? 0}</p>
-          </div>
+          <PremiumStatCard icon="◉" label="Users" value={overview.users} />
+          <PremiumStatCard icon="◈" label="Appointments" value={overview.appointments} />
+          <PremiumStatCard icon="◇" label="Revenue" value={formatCurrency(overview.paymentTotal)} />
+          <PremiumStatCard
+            icon="◎"
+            label="Active sessions"
+            value={overview.activeConsultations ?? 0}
+            linkTo="/consultations?status=active"
+            linkLabel="View live"
+          />
+          <PremiumStatCard
+            icon="◌"
+            label="Waiting sessions"
+            value={overview.waitingConsultations ?? 0}
+          />
         </div>
       ) : null}
 

@@ -43,12 +43,14 @@ export default function LoginPage({ onLogin }) {
   return (
     <div className="login-wrap">
       <div className="login-panel">
+        <div className="login-hero">
+          <div className="login-hero-mark">A</div>
+          <p className="admin-brand-kicker">Ashlar Lawyer Hub</p>
+          <h1>Admin Console</h1>
+          <p className="muted">Premium control center for lawyer verification and platform ops</p>
+        </div>
+
         <div className="login-top">
-          <div>
-            <p className="admin-brand-kicker">Ashlar Lawyer Hub</p>
-            <h1>Admin Console</h1>
-            <p className="muted">Lawyer verification and onboarding review</p>
-          </div>
           <BackendStatus />
         </div>
 
@@ -86,10 +88,9 @@ export default function LoginPage({ onLogin }) {
             </label>
             {error ? <Alert message={error} /> : null}
             <button className="btn btn-primary btn-full" type="submit" disabled={loading}>
-              {loading ? 'Signing in…' : 'Sign in'}
+              {loading ? 'Signing in…' : 'Sign in to Admin'}
             </button>
           </form>
-
         </div>
       </div>
     </div>
