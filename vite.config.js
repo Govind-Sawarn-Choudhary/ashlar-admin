@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const LIVE_API = 'http://72.62.228.106:8080';
+const LIVE_API = 'http://160.191.14.97:8080';
 
 export default defineConfig({
   plugins: [react()],
