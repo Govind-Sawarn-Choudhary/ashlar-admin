@@ -5,7 +5,8 @@ import { AdminLayout } from '../components/AdminLayout.jsx';
 import { Alert } from '../components/Alert.jsx';
 import { LoadingBlock } from '../components/LoadingBlock.jsx';
 import { StatusBadge } from '../components/StatusBadge.jsx';
-import { formatCurrency, formatDate, formatLabel, formatPhone } from '../utils/format.js';
+import { formatDate, formatLabel, formatPhone } from '../utils/format.js';
+import { formatMeteredSummary } from '../utils/billing.js';
 
 export default function ConsultationsPage({ onLogout }) {
   const navigate = useNavigate();
@@ -66,7 +67,7 @@ export default function ConsultationsPage({ onLogout }) {
         <div className="page-card-header">
           <div>
             <h2>All sessions</h2>
-            <p className="page-card-meta">Agora-powered consultations</p>
+            <p className="page-card-meta">Prepaid and per-minute wallet sessions</p>
           </div>
         </div>
 
@@ -94,7 +95,7 @@ export default function ConsultationsPage({ onLogout }) {
             <p className="muted">
               {status
                 ? `No ${status} sessions right now.`
-                : 'Sessions appear after users start a paid consultation.'}
+                : 'Sessions appear after users and lawyers join an online booking (prepaid or per-minute).'}
             </p>
           </div>
         ) : (
@@ -106,6 +107,7 @@ export default function ConsultationsPage({ onLogout }) {
                   <th>User</th>
                   <th>Lawyer</th>
                   <th>Type</th>
+                  <th>Billing</th>
                   <th>Channel</th>
                   <th>Status</th>
                   <th>Started</th>
@@ -123,6 +125,7 @@ export default function ConsultationsPage({ onLogout }) {
                     <td>{session.userName || formatPhone(session.userPhone)}</td>
                     <td>{session.lawyerName || formatPhone(session.lawyerPhone)}</td>
                     <td>{formatLabel(session.consultationType)}</td>
+                    <td>{formatMeteredSummary(session)}</td>
                     <td className="mono-cell">{session.channelName || '—'}</td>
                     <td>
                       <StatusBadge status={session.status} />

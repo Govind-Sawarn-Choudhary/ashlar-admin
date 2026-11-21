@@ -6,6 +6,12 @@ import { Alert } from '../components/Alert.jsx';
 import { LoadingBlock } from '../components/LoadingBlock.jsx';
 import { StatusBadge } from '../components/StatusBadge.jsx';
 import { formatCurrency, formatDate, formatLabel, formatPhone } from '../utils/format.js';
+import {
+  formatBillingModel,
+  formatBookingPricing,
+  formatMeteredSummary,
+  isPerMinuteBooking,
+} from '../utils/billing.js';
 
 function InfoRow({ label, value }) {
   return (
@@ -66,9 +72,18 @@ export default function AppointmentDetailPage({ onLogout }) {
             <InfoRow label="Status" value={<StatusBadge status={appointment.status} />} />
             <InfoRow label="Consultation type" value={formatLabel(appointment.consultationType)} />
             <InfoRow label="Mode" value={formatLabel(appointment.mode)} />
-            <InfoRow label="Amount" value={formatCurrency(appointment.amount)} />
+            <InfoRow label="Billing" value={formatBillingModel(appointment)} />
+            <InfoRow label="Pricing" value={formatBookingPricing(appointment)} />
+            {isPerMinuteBooking(appointment) ? (
+              <InfoRow
+                label="Prepaid at booking"
+                value={formatCurrency(appointment.amount)}
+              />
+            ) : (
+              <InfoRow label="Amount" value={formatCurrency(appointment.amount)} />
+            )}
             <InfoRow
-              label="Duration"
+              label={isPerMinuteBooking(appointment) ? 'Max duration' : 'Duration'}
               value={appointment.durationMinutes ? `${appointment.durationMinutes} min` : '—'}
             />
             <InfoRow label="Scheduled" value={formatDate(appointment.scheduledAt)} />
@@ -98,7 +113,11 @@ export default function AppointmentDetailPage({ onLogout }) {
           ) : (
             <section className="card detail-section">
               <h2>Payment</h2>
-              <p className="muted">No payment linked to this appointment.</p>
+              <p className="muted">
+                {isPerMinuteBooking(appointment)
+                  ? 'Metered online booking — user wallet is charged per minute during the session.'
+                  : 'No payment linked to this appointment.'}
+              </p>
             </section>
           )}
 
@@ -107,12 +126,15 @@ export default function AppointmentDetailPage({ onLogout }) {
               <div className="page-card-header">
                 <div>
                   <h2>Consultation session</h2>
-                  <p className="page-card-meta">Agora channel and join status</p>
+                  <p className="page-card-meta">Live session and billing</p>
                 </div>
                 <Link className="btn btn-secondary btn-sm" to={`/consultations/${consultation.id}`}>
                   View session
                 </Link>
               </div>
+              {isPerMinuteBooking(appointment) ? (
+                <InfoRow label="Metered total" value={formatMeteredSummary(consultation)} />
+              ) : null}
               <InfoRow label="Session status" value={<StatusBadge status={consultation.status} />} />
               <InfoRow label="Channel" value={consultation.channelName || '—'} />
               <InfoRow label="User joined" value={formatDate(consultation.userJoinedAt)} />

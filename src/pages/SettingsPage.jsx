@@ -58,6 +58,11 @@ export default function SettingsPage({ onLogout }) {
     { key: 'commission_percent', label: 'Commission %', type: 'number' },
     { key: 'min_wallet_topup', label: 'Min wallet top-up', type: 'number' },
     { key: 'min_wallet_withdrawal', label: 'Min wallet withdrawal', type: 'number' },
+    {
+      key: 'min_consult_wallet_minutes',
+      label: 'Min consult wallet (minutes)',
+      type: 'number',
+    },
     { key: 'challan_test_otp', label: 'Challan test OTP' },
   ];
 

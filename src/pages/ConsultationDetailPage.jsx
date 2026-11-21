@@ -6,6 +6,12 @@ import { Alert } from '../components/Alert.jsx';
 import { LoadingBlock } from '../components/LoadingBlock.jsx';
 import { StatusBadge } from '../components/StatusBadge.jsx';
 import { formatCurrency, formatDate, formatLabel, formatPhone } from '../utils/format.js';
+import {
+  formatBillingModel,
+  formatBookingPricing,
+  formatMeteredSummary,
+  isPerMinuteBooking,
+} from '../utils/billing.js';
 
 function InfoRow({ label, value }) {
   return (
@@ -87,7 +93,7 @@ export default function ConsultationDetailPage({ onLogout }) {
               <div className="page-card-header">
                 <div>
                   <h2>Session</h2>
-                  <p className="page-card-meta">Agora channel details</p>
+                  <p className="page-card-meta">Channel, timing, and billing</p>
                 </div>
                 {session.status !== 'ended' ? (
                   <button
@@ -104,9 +110,18 @@ export default function ConsultationDetailPage({ onLogout }) {
               <InfoRow label="Channel" value={session.channelName || '—'} />
               <InfoRow label="Type" value={formatLabel(session.consultationType)} />
               <InfoRow label="Mode" value={formatLabel(session.mode)} />
-              <InfoRow label="Amount" value={formatCurrency(session.amount)} />
+              <InfoRow label="Billing" value={formatBillingModel(session)} />
+              <InfoRow label="Rate / pricing" value={formatBookingPricing(session)} />
+              {isPerMinuteBooking(session) ? (
+                <>
+                  <InfoRow label="Billed minutes" value={session.billedMinutes ?? 0} />
+                  <InfoRow label="Charged to user" value={formatMeteredSummary(session)} />
+                </>
+              ) : (
+                <InfoRow label="Prepaid amount" value={formatCurrency(session.amount)} />
+              )}
               <InfoRow
-                label="Duration"
+                label={isPerMinuteBooking(session) ? 'Max duration' : 'Booked duration'}
                 value={session.durationMinutes ? `${session.durationMinutes} min` : '—'}
               />
               <InfoRow label="User joined" value={formatDate(session.userJoinedAt)} />

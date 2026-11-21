@@ -12,6 +12,7 @@ import {
   isBarUnverified,
 } from '../utils/lawyer.js';
 import { formatLabel } from '../utils/format.js';
+import { formatConsultationFeeAdmin } from '../utils/billing.js';
 
 const DOC_LABELS = {
   bar_council_certificate: 'Bar Council Certificate',
@@ -338,9 +339,7 @@ export default function LawyerDetailPage({ onLogout }) {
                 <li key={fee.fee_type}>
                   <strong>{formatLabel(fee.fee_type)}</strong>
                   <span>
-                    {fee.fee_type === 'physical'
-                      ? `₹${fee.amount} per session`
-                      : `₹${fee.amount} / ${fee.duration_label}`}
+                    {formatConsultationFeeAdmin(fee)}
                     {fee.location ? ` @ ${fee.location}` : ''}
                   </span>
                 </li>

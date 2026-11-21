@@ -5,7 +5,8 @@ import { AdminLayout } from '../components/AdminLayout.jsx';
 import { Alert } from '../components/Alert.jsx';
 import { LoadingBlock } from '../components/LoadingBlock.jsx';
 import { StatusBadge } from '../components/StatusBadge.jsx';
-import { formatCurrency, formatDate, formatLabel, formatPhone } from '../utils/format.js';
+import { formatDate, formatLabel, formatPhone } from '../utils/format.js';
+import { formatBillingModel, formatBookingPricing } from '../utils/billing.js';
 
 function InfoRow({ label, value }) {
   return (
@@ -105,7 +106,8 @@ export default function UserDetailPage({ onLogout }) {
                       <th>ID</th>
                       <th>Lawyer</th>
                       <th>Type</th>
-                      <th>Amount</th>
+                      <th>Billing</th>
+                      <th>Pricing</th>
                       <th>Status</th>
                       <th>Date</th>
                     </tr>
@@ -120,7 +122,8 @@ export default function UserDetailPage({ onLogout }) {
                         <td>{item.id}</td>
                         <td>{item.lawyerName || item.lawyerPhone}</td>
                         <td>{formatLabel(item.consultationType)}</td>
-                        <td>{formatCurrency(item.amount)}</td>
+                        <td>{formatBillingModel(item)}</td>
+                        <td>{formatBookingPricing(item)}</td>
                         <td>
                           <StatusBadge status={item.status} />
                         </td>

@@ -5,7 +5,8 @@ import { Alert } from '../components/Alert.jsx';
 import { LoadingBlock } from '../components/LoadingBlock.jsx';
 import { StatusBadge } from '../components/StatusBadge.jsx';
 import { api } from '../api/client.js';
-import { formatCurrency, formatDate, formatLabel } from '../utils/format.js';
+import { formatDate, formatLabel } from '../utils/format.js';
+import { formatBillingModel, formatBookingPricing } from '../utils/billing.js';
 
 export default function AppointmentsPage({ onLogout }) {
   const navigate = useNavigate();
@@ -101,7 +102,8 @@ export default function AppointmentsPage({ onLogout }) {
                   <th>Lawyer</th>
                   <th>Type</th>
                   <th>Mode</th>
-                  <th>Amount</th>
+                  <th>Billing</th>
+                  <th>Pricing</th>
                   <th>Status</th>
                   <th>Date</th>
                 </tr>
@@ -118,7 +120,8 @@ export default function AppointmentsPage({ onLogout }) {
                     <td>{item.lawyerName || item.lawyerPhone}</td>
                     <td>{formatLabel(item.consultationType)}</td>
                     <td>{formatLabel(item.mode)}</td>
-                    <td>{formatCurrency(item.amount)}</td>
+                    <td>{formatBillingModel(item)}</td>
+                    <td>{formatBookingPricing(item)}</td>
                     <td>
                       <StatusBadge status={item.status} />
                     </td>
